@@ -1,5 +1,5 @@
 <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-<!--        ✦  VAMPIRE MUSIC  ✦           -->
+<!--        ✦  VAMPIRE X MUSIC  ✦           -->
 <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
 
 <div align="center">
@@ -11,7 +11,7 @@
 <!-- 🚀 HEROKU BUTTON TOP -->
 <div align="center">
 
-[![🚀 DEPLOY ON HEROKU](https://img.shields.io/badge/🚀%20Deploy%20On%20Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white)](https://dashboard.heroku.com/new?template=https://github.com/llTEAM-VAMPIREll/XBIT_VAMPU)
+[![🚀 DEPLOY ON HEROKU](https://img.shields.io/badge/🚀%20Deploy%20On%20Heroku-430098?style=for-the-badge&logo=heroku&logoColor=white)](https://dashboard.heroku.com/new?template=https://github.com/VAMPIRE-BOTS/VAMPIRE-VBIT)
 
 </div>
 
@@ -56,5 +56,5 @@
 ### Step 1 — Clone Repo
 
 ```bash
-git clone https://github.com/llTEAM-VAMPIREll/XBIT_VAMPU
-cd XBIT_VAMPU
+git clone https://github.com/VAMPIRE-BOTS/VAMPIRE-VBIT
+cd VAMPIRE-VBIT
