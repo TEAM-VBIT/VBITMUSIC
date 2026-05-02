@@ -38,7 +38,6 @@ async def start_pm(client, message: Message, _):
         name = message.text.split(None, 1)[1]
         if name[0:4] == "help":
             keyboard = help_pannel(_)
-            await message.reply_sticker("CAACAgUAAxkBAAEDpRhp9aax0zmBMECAfqfze-8WAAH4_RMAAnsbAAKbj1lVEcBLKk-Hnm87BA")
             return await message.reply_photo(
                 photo=random.choice(config.START_IMG_URL),
                 caption=_["help_1"].format(config.SUPPORT_CHAT),
@@ -91,7 +90,6 @@ async def start_pm(client, message: Message, _):
                 )
     else:
         out = private_panel(_)
-        await message.reply_sticker("CAACAgUAAxkBAAEDpRhp9aax0zmBMECAfqfze-8WAAH4_RMAAnsbAAKbj1lVEcBLKk-Hnm87BA")
         await message.reply_photo(
             photo=random.choice(config.START_IMG_URL),
             caption=_["start_2"].format(message.from_user.mention, app.mention),
@@ -111,10 +109,10 @@ async def start_gp(client, message: Message, _):
     uptime = int(time.time() - _boot_)
     try:
         await message.reply_photo(
-        photo=random.choice(config.START_IMG_URL),
-        caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-        reply_markup=InlineKeyboardMarkup(out),
-    )
+            photo=random.choice(config.START_IMG_URL),
+            caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
+            reply_markup=InlineKeyboardMarkup(out),
+        )
         return await add_served_chat(message.chat.id)
     except ChannelPrivate:
         return
@@ -122,10 +120,10 @@ async def start_gp(client, message: Message, _):
         asyncio.sleep(e.value)
         try:
             await message.reply_photo(
-        photo=random.choice(config.START_IMG_URL),
-        caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
-        reply_markup=InlineKeyboardMarkup(out),
-        )
+                photo=random.choice(config.START_IMG_URL),
+                caption=_["start_1"].format(app.mention, get_readable_time(uptime)),
+                reply_markup=InlineKeyboardMarkup(out),
+            )
             return await add_served_chat(message.chat.id)
         except:
             return
