@@ -4,14 +4,14 @@ import asyncio
 from yt_dlp import YoutubeDL
 from config import API_URL, API_KEY
 
-# बोट के कोर कॉलिंग इंजन के लिए आवश्यक वेरिएबल
+# बोट कॉलिंग इंजन (call.py) के लिए आवश्यक ग्लोबल वेरिएबल
 cookie_txt_file = None
 
 class YouTubeAPI:
     def __init__(self):
         self.api_url = API_URL
         self.api_key = API_KEY
-        # Termux API फेल होने पर बैकअप ऑप्शन
+        # Termux API डाउन होने की स्थिति में इमरजेंसी लोकल बैकअप कॉन्फ़िगरेशन
         self.opts = {
             "format": "bestaudio/best",
             "outtmpl": "downloads/%(id)s.%(ext)s",
@@ -22,7 +22,7 @@ class YouTubeAPI:
 
     async def fetch_stream_url(self, video_id: str):
         """
-        यह फंक्शन टर्मक्स Serveo API को हिट करके डायरेक्ट स्ट्रीमिंग लिंक लाएगा।
+        यह फंक्शन तुम्हारे टर्मक्स Serveo API गेटवे को हिट करके डायरेक्ट हाई-स्पीड स्ट्रीमिंग लिंक फेच करता है।
         """
         params = {
             "key": self.api_key,
@@ -47,7 +47,7 @@ class YouTubeAPI:
                     else:
                         return {"status": False, "error": f"Termux Status: {response.status}"}
             except Exception:
-                # लोकल फॉलबैक (अगर टर्मक्स बंद हो)
+                # लोकल फॉलबैक (अगर टर्मक्स टनल काम न करे)
                 try:
                     loop = asyncio.get_running_loop()
                     with YoutubeDL(self.opts) as ydl:
@@ -62,7 +62,22 @@ class YouTubeAPI:
                 except Exception as ex:
                     return {"status": False, "error": str(ex)}
 
+    async def exists(self, link: str, videoid: bool = False):
+        """
+        /play, /vplay, /cplay कमांड्स के लिए यूआरएल वेरिफिकेशन सिस्टम।
+        """
+        if videoid:
+            return True
+        if not link:
+            return False
+        if "youtu.be" in str(link) or "youtube.com" in str(link):
+            return True
+        return False
+
     def extract_id(self, url: str):
+        """
+        यूट्यूब यूआरएल से 11 डिजिट की यूनिक वीडियो आईडी एक्सट्रैक्ट करने का रेगुलर एक्सप्रेशन।
+        """
         regex = r"(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^\"&?\/\s]{11})"
         match = re.search(regex, url)
         if match:
@@ -71,19 +86,22 @@ class YouTubeAPI:
 
     async def url(self, message_or_url):
         """
-        /play, /vplay, /cplay आदि के यूआरएल चेकर के लिए आवश्यक फंक्शन
+        टेलीग्राम संदेश टेक्स्ट या इनपुट सर्च क्वेरी को प्रोसेस करके वैलिड यूट्यूब लिंक फॉर्मेट में बदलता है।
         """
         if hasattr(message_or_url, "text"):
             text = message_or_url.text.split(None, 1)
-            url_str = text[1] if len(text) > 1 else ""
+            url_str = text[1].strip() if len(text) > 1 else ""
         else:
-            url_str = str(message_or_url)
+            url_str = str(message_or_url).strip()
+            
+        if not url_str:
+            return None
             
         video_id = self.extract_id(url_str)
         if video_id:
             return f"https://youtube.com{video_id}"
             
-        # अगर सिर्फ नाम लिखा है तो सर्च करो
+        # अगर यूआरएल की जगह गाने का नाम भेजा गया है तो उसे सर्च करें
         search_results = await self.search(url_str, limit=1)
         if search_results:
             return f"https://youtube.com{search_results[0]['id']}"
@@ -91,23 +109,24 @@ class YouTubeAPI:
 
     async def details(self, url: str, forceplay: bool = False):
         """
-        बोट का कोर इंजन गाना प्ले करने से पहले डिटेल्स (Title, Duration, Link) 
-        इसी फंक्शन से निकालता है।
+        प्लेबैक शुरू होने से पहले बोट कोर इसी मेथड से गानों का मेटाडेटा अनपैक करता है।
         """
         video_id = self.extract_id(url)
         if not video_id:
-            return None, None
+            return None, None, None, None
             
         res = await self.fetch_stream_url(video_id)
         if res.get("status"):
             title = res.get("title")
             duration = res.get("duration")
-            # बोट को सीधा स्ट्रीम लिंक देने के लिए हम इसे यहीं इंजेक्ट कर देते हैं
-            # AnonXMusic का प्लेबैक डेकोरेटर 'details' से टाइटल और ड्यूरेशन उठाता है
-            return title, duration
-        return None, None
+            thumbnail = f"https://youtube.com{video_id}/hqdefault.jpg"
+            return title, duration, thumbnail, video_id
+        return None, None, None, None
 
     async def search(self, query: str, limit: int = 1):
+        """
+        यूट्यूब सर्च इंजन जो कीवर्ड के आधार पर गानों की लिस्ट निकालता है।
+        """
         loop = asyncio.get_running_loop()
         with YoutubeDL({"quiet": True, "extract_flat": True}) as ydl:
             try:
@@ -123,6 +142,9 @@ class YouTubeAPI:
                 return []
 
     async def playlist(self, url: str, limit: int = 25):
+        """
+        यूट्यूब प्लेलिस्ट डाउनलोड और बल्क स्ट्रीमिंग को सपोर्ट करने के लिए।
+        """
         loop = asyncio.get_running_loop()
         with YoutubeDL({"quiet": True, "extract_flat": True}) as ydl:
             try:
@@ -140,5 +162,5 @@ class YouTubeAPI:
             except Exception:
                 return []
 
-# ऑब्जेक्ट इनिशियलाइजेशन ताकि बोट इसे आसानी से इम्पोर्ट कर सके
+# बोट कंपोनेंट्स में आसानी से इम्पोर्ट करने के लिए इंस्टेंस इनिशियलाइजेशन
 youtube_downloader = YouTubeAPI()
