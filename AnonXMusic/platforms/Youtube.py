@@ -4,6 +4,9 @@ import asyncio
 from yt_dlp import YoutubeDL
 from config import API_URL, API_KEY
 
+# बोट के कोर इंजन (call.py) के इम्पोर्ट एरर को फिक्स करने के लिए यह वेरिएबल ज़रूरी है
+cookie_txt_file = None
+
 class YouTubeAPI:
     def __init__(self):
         self.api_url = API_URL
