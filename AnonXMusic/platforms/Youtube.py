@@ -22,7 +22,7 @@ class YouTubeAPI:
 
     async def fetch_stream_url(self, video_id: str):
         """
-        यह फंक्शन तुम्हारे टर्मक्स Serveo API गेटवे को हिट करके डायरेक्ट हाई-स्पीड स्ट्रीमिंगリンク फेच करता है।
+        यह फंक्शन तुम्हारे टर्मक्स Serveo API गेटवे को हिट करके डायरेक्ट हाई-स्पीड स्ट्रीमिंग लिंक फेच करता है।
         """
         params = {
             "key": self.api_key,
@@ -101,7 +101,7 @@ class YouTubeAPI:
         if video_id:
             return f"https://youtube.com{video_id}"
             
-        # अगर यूआरएल की जगह गाने का नाम भेजा गया है तो उसे सर्च करें
+        # यहाँ फिक्स किया गया है: लिस्ट के पहले इंडेक्स [0] से आईडी निकाली जा रही है
         search_results = await self.search(url_str, limit=1)
         if search_results and isinstance(search_results, list):
             return f"https://youtube.com{search_results[0]['id']}"
